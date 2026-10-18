@@ -1,0 +1,72 @@
+MERN PRACTICAL 3: MONGODB CRUD USING SHELL AND NODE.JS
+=====================================================
+
+PART A — MongoDB Shell
+----------------------
+Start MongoDB, then open a terminal and type: mongosh
+
+use college
+db.students.insertOne({ name: "Amit", course: "BSc IT", age: 20 })
+db.students.find()
+db.students.updateOne({ name: "Amit" }, { $set: { age: 21 } })
+db.students.deleteOne({ name: "Amit" })
+
+PART B — Node.js connection and CRUD
+------------------------------------
+Create a folder, then run:
+npm init -y
+npm install mongodb
+In package.json add: "type": "module"
+Create server.js with the code below.
+Ensure MongoDB is running at mongodb://127.0.0.1:27017
+Run: node server.js
+
+----- FILE: server.js -----
+
+import { MongoClient } from 'mongodb';
+
+const client = new MongoClient('mongodb://127.0.0.1:27017');
+
+async function main() {
+  try {
+    await client.connect();
+    console.log('Connected to MongoDB');
+
+    const db = client.db('college');
+    const students = db.collection('students');
+
+    // CREATE
+    const insertResult = await students.insertOne({
+      name: 'Amit',
+      course: 'BSc IT',
+      age: 20
+    });
+    console.log('Inserted ID:', insertResult.insertedId);
+
+    // READ
+    const allStudents = await students.find().toArray();
+    console.log('All students:', allStudents);
+
+    // UPDATE
+    await students.updateOne(
+      { name: 'Amit' },
+      { $set: { age: 21 } }
+    );
+    console.log('After update:', await students.find().toArray());
+
+    // DELETE — uncomment these two lines when you want to remove Amit
+    // await students.deleteOne({ name: 'Amit' });
+    // console.log('After delete:', await students.find().toArray());
+
+  } catch (error) {
+    console.error('MongoDB error:', error.message);
+  } finally {
+    await client.close();
+  }
+}
+
+main();
+
+----- OUTPUT -----
+Terminal displays the inserted document and the list of students.
+CRUD = Create, Read, Update, Delete.

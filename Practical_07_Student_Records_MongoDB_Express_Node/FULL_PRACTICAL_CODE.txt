@@ -1,0 +1,145 @@
+MERN PRACTICAL 7: STUDENT RECORDS USING MONGODB, EXPRESS AND NODE.JS
+====================================================================
+
+1) SETUP COMMANDS
+-----------------
+Create a folder and open terminal inside it:
+
+npm init -y
+npm install express mongoose
+
+In package.json, add this inside "scripts":
+"start": "node server.js"
+
+2) FILE: server.js
+------------------
+const express = require("express");
+const mongoose = require("mongoose");
+
+const app = express();
+app.use(express.json());
+
+// Connect to MongoDB. Make sure MongoDB is running.
+mongoose.connect("mongodb://127.0.0.1:27017/studentDB")
+  .then(() => console.log("MongoDB connected"))
+  .catch((err) => console.log(err));
+
+const studentSchema = new mongoose.Schema({
+  name: { type: String, required: true },
+  course: String,
+  age: Number
+});
+
+const Student = mongoose.model("Student", studentSchema);
+
+// CREATE: add student
+app.post("/students", async (req, res) => {
+  try {
+    const student = await Student.create(req.body);
+    res.status(201).json(student);
+  } catch (err) {
+    res.status(400).json({ error: err.message });
+  }
+});
+
+// READ: get all students
+app.get("/students", async (req, res) => {
+  try {
+    const students = await Student.find();
+    res.json(students);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// SEARCH: find students by name (case-insensitive partial match)
+app.get("/students/search/:name", async (req, res) => {
+  try {
+    const students = await Student.find({
+      name: { $regex: req.params.name, $options: "i" }
+    });
+    res.json(students);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// UPDATE: update student using MongoDB document ID
+app.put("/students/:id", async (req, res) => {
+  try {
+    const student = await Student.findByIdAndUpdate(
+      req.params.id, req.body, { new: true, runValidators: true }
+    );
+    if (!student) return res.status(404).json({ message: "Student not found" });
+    res.json(student);
+  } catch (err) {
+    res.status(400).json({ error: err.message });
+  }
+});
+
+// DELETE: delete student using MongoDB document ID
+app.delete("/students/:id", async (req, res) => {
+  try {
+    const student = await Student.findByIdAndDelete(req.params.id);
+    if (!student) return res.status(404).json({ message: "Student not found" });
+    res.json({ message: "Student deleted successfully" });
+  } catch (err) {
+    res.status(400).json({ error: err.message });
+  }
+});
+
+app.listen(5000, () => console.log("Server running on port 5000"));
+
+3) RUN THE SERVER
+-----------------
+npm start
+
+4) TEST WITH THUNDER CLIENT
+---------------------------
+A. CREATE student
+Method: POST
+URL: http://localhost:5000/students
+Body -> JSON:
+{
+  "name": "Rahul",
+  "course": "BSc IT",
+  "age": 20
+}
+
+B. REQUIRED VALIDATION TEST
+Method: POST
+URL: http://localhost:5000/students
+Body -> JSON:
+{
+  "course": "BSc IT",
+  "age": 20
+}
+The request returns an error because name is required.
+
+C. READ all students
+Method: GET
+URL: http://localhost:5000/students
+
+D. SEARCH by name
+Method: GET
+URL: http://localhost:5000/students/search/Rahul
+
+E. UPDATE student
+Copy the _id from GET response.
+Method: PUT
+URL: http://localhost:5000/students/PASTE_ID_HERE
+Body -> JSON:
+{
+  "name": "Rahul Sharma",
+  "course": "BSc IT",
+  "age": 21
+}
+
+F. DELETE student
+Method: DELETE
+URL: http://localhost:5000/students/PASTE_ID_HERE
+
+Notes:
+- Start MongoDB before starting the server.
+- Use the real _id returned by MongoDB for PUT and DELETE.
+- `required: true` is checked by Mongoose when a document is created.

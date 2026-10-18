@@ -1,0 +1,129 @@
+MERN PRACTICAL 5: REACT FORM + EXPRESS API + MONGODB
+===================================================
+
+This practical contains BOTH frontend and backend code. It saves submitted student data in MongoDB.
+
+FOLDER SETUP
+------------
+Create folder Practical_05 with two subfolders: backend and frontend.
+
+BACKEND SETUP
+-------------
+Open terminal:
+cd backend
+npm init -y
+npm install express mongodb cors
+In backend/package.json add: "type": "module"
+Create server.js below.
+Ensure MongoDB is running.
+
+----- FILE: backend/server.js -----
+
+import express from 'express';
+import cors from 'cors';
+import { MongoClient } from 'mongodb';
+
+const app = express();
+const PORT = 5000;
+const client = new MongoClient('mongodb://127.0.0.1:27017');
+
+app.use(cors());
+app.use(express.json());
+
+let students;
+
+async function startServer() {
+  await client.connect();
+  students = client.db('college').collection('students');
+
+  app.post('/api/students', async (req, res) => {
+    const { name, email } = req.body;
+    if (!name || !email || !email.includes('@')) {
+      return res.status(400).json({ message: 'Valid name and email required' });
+    }
+    const result = await students.insertOne({ name, email });
+    res.status(201).json({ message: 'Student saved', id: result.insertedId });
+  });
+
+  app.get('/api/students', async (req, res) => {
+    res.json(await students.find().toArray());
+  });
+
+  app.listen(PORT, () => console.log(`Backend running at http://localhost:${PORT}`));
+}
+
+startServer().catch(err => console.error('Startup error:', err.message));
+
+FRONTEND SETUP
+--------------
+Open a second terminal:
+npm create vite@latest frontend -- --template react
+cd frontend
+npm install
+Replace src/App.jsx with code below. Keep generated src/main.jsx and index.html.
+
+----- FILE: frontend/src/App.jsx -----
+
+import { useState } from 'react';
+
+export default function App() {
+  const [name, setName] = useState('');
+  const [email, setEmail] = useState('');
+  const [message, setMessage] = useState('');
+  const [students, setStudents] = useState([]);
+
+  async function loadStudents() {
+    const response = await fetch('http://localhost:5000/api/students');
+    setStudents(await response.json());
+  }
+
+  async function handleSubmit(event) {
+    event.preventDefault();
+    if (!name.trim() || !email.includes('@')) {
+      setMessage('Enter a name and valid email.');
+      return;
+    }
+
+    try {
+      const response = await fetch('http://localhost:5000/api/students', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name, email })
+      });
+      const data = await response.json();
+      if (!response.ok) throw new Error(data.message || 'Request failed');
+      setMessage('Student saved successfully!');
+      setName('');
+      setEmail('');
+      loadStudents();
+    } catch (error) {
+      setMessage('Error: ' + error.message + '. Is backend running?');
+    }
+  }
+
+  return (
+    <div style={{ fontFamily: 'Arial', margin: 30 }}>
+      <h1>Student Registration</h1>
+      <form onSubmit={handleSubmit}>
+        <p><input placeholder="Name" value={name} onChange={e => setName(e.target.value)} /></p>
+        <p><input placeholder="Email" value={email} onChange={e => setEmail(e.target.value)} /></p>
+        <button type="submit">Save Student</button>
+        <button type="button" onClick={loadStudents}>Show Students</button>
+      </form>
+      <p>{message}</p>
+      <h2>Saved Students</h2>
+      <ul>{students.map(s => <li key={s._id}>{s.name} — {s.email}</li>)}</ul>
+    </div>
+  );
+}
+
+----- RUN THE PRACTICAL -----
+Terminal 1:
+cd backend
+node server.js
+
+Terminal 2 (from Practical_05 folder):
+cd frontend
+npm run dev
+
+Open the Vite URL shown in the terminal. MongoDB must be running.

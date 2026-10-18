@@ -1,0 +1,62 @@
+MERN PRACTICAL 6: REACT-BOOTSTRAP NAVBAR, BUTTON, TABLE AND GRID
+===============================================================
+
+Create React app:
+npm create vite@latest Practical_06 -- --template react
+cd Practical_06
+npm install
+npm install react-bootstrap bootstrap
+Replace src/App.jsx and src/main.jsx with the code below.
+
+----- FILE: src/App.jsx -----
+
+import Container from 'react-bootstrap/Container';
+import Navbar from 'react-bootstrap/Navbar';
+import Button from 'react-bootstrap/Button';
+import Table from 'react-bootstrap/Table';
+import Row from 'react-bootstrap/Row';
+import Col from 'react-bootstrap/Col';
+
+export default function App() {
+  const students = [
+    { id: 1, name: 'Amit', course: 'BSc IT' },
+    { id: 2, name: 'Neha', course: 'BSc IT' },
+    { id: 3, name: 'Rahul', course: 'BCA' }
+  ];
+
+  return (
+    <>
+      <Navbar bg="dark" data-bs-theme="dark">
+        <Container><Navbar.Brand>College App</Navbar.Brand></Container>
+      </Navbar>
+      <Container className="py-4">
+        <h1>React Bootstrap Practical</h1>
+        <Row className="g-3 my-3">
+          <Col xs={12} md={6}><div className="p-3 border rounded">Column 1</div></Col>
+          <Col xs={12} md={6}><div className="p-3 border rounded">Column 2</div></Col>
+        </Row>
+        <Button className="mb-3" onClick={() => alert('Button clicked!')}>Click Me</Button>
+        <Table striped bordered hover responsive>
+          <thead><tr><th>ID</th><th>Name</th><th>Course</th></tr></thead>
+          <tbody>
+            {students.map(s => (
+              <tr key={s.id}><td>{s.id}</td><td>{s.name}</td><td>{s.course}</td></tr>
+            ))}
+          </tbody>
+        </Table>
+      </Container>
+    </>
+  );
+}
+
+----- FILE: src/main.jsx -----
+
+import React from 'react';
+import { createRoot } from 'react-dom/client';
+import 'bootstrap/dist/css/bootstrap.min.css';
+import App from './App.jsx';
+
+createRoot(document.getElementById('root')).render(<App />);
+
+----- RUN -----
+npm run dev

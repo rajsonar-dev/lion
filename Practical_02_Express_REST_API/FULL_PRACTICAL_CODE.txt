@@ -1,0 +1,59 @@
+MERN PRACTICAL 2: EXPRESS SERVER, ROUTING, MIDDLEWARE, STUDENT REST API
+========================================================================
+
+Create folder Practical_02 and run:
+npm init -y
+npm install express
+In package.json add: "type": "module"
+Create server.js and paste the code below.
+Run: node server.js
+Open: http://localhost:5000/api/students
+
+----- FILE: server.js -----
+
+import express from 'express';
+
+const app = express();
+const PORT = 5000;
+
+// Middleware to read JSON request data
+app.use(express.json());
+
+// Custom middleware
+app.use((req, res, next) => {
+  console.log(req.method, req.url);
+  next();
+});
+
+const students = [
+  { id: 1, name: 'Amit', course: 'BSc IT' },
+  { id: 2, name: 'Neha', course: 'BSc IT' },
+  { id: 3, name: 'Rahul', course: 'BCA' }
+];
+
+app.get('/', (req, res) => {
+  res.send('Express server is running');
+});
+
+app.get('/api/students', (req, res) => {
+  res.json(students);
+});
+
+app.get('/api/students/:id', (req, res) => {
+  const student = students.find(s => s.id === Number(req.params.id));
+  if (!student) {
+    return res.status(404).json({ message: 'Student not found' });
+  }
+  res.json(student);
+});
+
+app.listen(PORT, () => {
+  console.log(`Server running at http://localhost:${PORT}`);
+});
+
+----- TEST -----
+Open http://localhost:5000/api/students in browser.
+Open http://localhost:5000/api/students/1 for one student.
+
+----- GRAPHQL NOTE -----
+The code above is the required REST API. GraphQL is a separate query API style and is not implemented in this short example.

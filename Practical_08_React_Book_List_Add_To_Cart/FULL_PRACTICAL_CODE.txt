@@ -1,0 +1,154 @@
+MERN PRACTICAL 8: REACT BOOK LIST WITH COMPONENTS, PROPS, CHILDREN AND STATE
+=============================================================================
+
+1) SETUP COMMANDS
+-----------------
+npm create vite@latest book-list -- --template react
+cd book-list
+npm install
+npm run dev
+
+Inside src, create/replace the files below.
+
+2) FILE: src/Heading.jsx
+------------------------
+import React from "react";
+
+function Heading() {
+  return <h1 className="main-heading">Book Store</h1>;
+}
+
+export default Heading;
+
+3) FILE: src/ReadingCard.jsx
+----------------------------
+import React from "react";
+
+function ReadingCard({ title, category, price, onAdd, children }) {
+  return (
+    <div className="book-card">
+      <h2>{title}</h2>
+      <p><b>Category:</b> {category}</p>
+      <p><b>Price:</b> ₹{price}</p>
+
+          <div className="extra-details">{children}</div>
+
+      <button onClick={onAdd}>Add to Cart</button>
+    </div>
+  );
+}
+
+export default ReadingCard;
+
+4) FILE: src/App.jsx
+--------------------
+import React, { useState } from "react";
+import Heading from "./Heading";
+import ReadingCard from "./ReadingCard";
+import "./app.css";
+
+function App() {
+  const [cartCount, setCartCount] = useState(0);
+
+  function addToCart() {
+    setCartCount(cartCount + 1);
+  }
+
+  return (
+    <div className="container">
+      <Heading />
+      <h3>Books added to cart: {cartCount}</h3>
+
+      <div className="book-list">
+        <ReadingCard
+          title="The Alchemist"
+          category="Fiction"
+          price={299}
+          onAdd={addToCart}
+        >
+          <p>Availability: In stock</p>
+          <p>Rating: 4.5/5</p>
+        </ReadingCard>
+
+        <ReadingCard
+          title="Wings of Fire"
+          category="Biography"
+          price={250}
+          onAdd={addToCart}
+        >
+          <p>Availability: In stock</p>
+          <p>Rating: 4.7/5</p>
+        </ReadingCard>
+
+        <ReadingCard
+          title="Learning React"
+          category="Technology"
+          price={450}
+          onAdd={addToCart}
+        >
+          <p>Availability: Limited stock</p>
+          <p>Rating: 4.2/5</p>
+        </ReadingCard>
+      </div>
+    </div>
+  );
+}
+
+export default App;
+
+5) FILE: src/app.css
+--------------------
+body {
+  margin: 0;
+  font-family: Arial, sans-serif;
+}
+
+.container {
+  padding: 20px;
+  text-align: center;
+}
+
+.main-heading {
+  color: blue;
+}
+
+.book-list {
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.book-card {
+  width: 230px;
+  padding: 10px;
+  border: 1px solid black;
+  width: 220px;
+}
+
+.book-card h2 {
+  color: black;
+}
+
+.extra-details {
+  color: black;
+  font-size: 14px;
+}
+
+.book-card button {
+  padding: 5px 10px;
+}
+
+
+6) FILE: src/main.jsx
+---------------------
+import React from "react";
+import { createRoot } from "react-dom/client";
+import App from "./App";
+
+createRoot(document.getElementById("root")).render(
+  <React.StrictMode>
+    <App />
+  </React.StrictMode>
+);
+
